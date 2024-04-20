@@ -1,0 +1,4 @@
+# node moudules 파일
+./Front/node_modules
+./Front/package-lock.json
+
