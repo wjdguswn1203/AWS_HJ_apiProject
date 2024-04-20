@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>가위 바위 보 게임II</title>
+  </head>
+  <body>
+    <h3>가위 바위 보 게임II</h3>
+    <script>
+      function rspGame() {
+        let rsp_map = { 1: "가위", 2: "바위", 3: "보" };
+        let rsps = document.getElementsByName("rsp");
+        let user = 20;
+        
+        for(let i = 0;i<rsps.length;i++){
+            if(rsps[i].checked == true)
+                user = rsps[i].value;
+        }
+        user = parseInt(user);
+        
+        let com = Math.floor(Math.random() * 3 + 1);
+        let verdict = user - com;
+        let str_output = "User : " + rsp_map[user] + " vs  Com : " + rsp_map[com];
+        
+        if (verdict == -2 || verdict == 1) alert(str_output+" 당신이 이겼습니다.");
+        else if (verdict == 2 || verdict == -1) alert(str_output+" 당신이 졌습니다.");
+        else alert(str_output+" 무승부입니다.");
+      }
+    </script>
+    <hr />
+    <form>
+      <input type="radio" name="rsp" value="1" checked/> 가위
+      <input type="radio" name="rsp" value="2"/> 바위
+      <input type="radio" name="rsp" value="3"/> 보
+      <br><br>
+      <input type = "button" value="Game Go!!" onclick="rspGame()"></button>
+    </form>
+  </body>
+</html>
