@@ -1,14 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-// const mysql = require('sync-mysql');
-// const env = require('dotenv').config({ path: "../../.env" });
+const mysql = require('sync-mysql');
+const env = require('dotenv').config({ path: "../../.env" });
 
-// var connection = new mysql({
-//     host: process.env.host,
-//     user: process.env.user,
-//     password: process.env.password,
-//     database: process.env.database
-// });
+var connection = new mysql({
+    host: process.env.host,
+    user: process.env.user,
+    password: process.env.password,
+    database: process.env.database
+});
 
 const app = express()
 
