@@ -4,6 +4,10 @@ from pymongo import MongoClient
 import pandas as pd
 import os.path
 import xmltodict
+from sqlalchemy import *
+from sqlalchemy.orm import sessionmaker
+from models import Pyeup
+import uuid
 
 app = FastAPI()
 
@@ -26,6 +30,26 @@ PASSWORD = get_secret("Local_Password")
 
 APIKEY = get_secret("API_KEY")
 
+PORT = get_secret("Mysql_Port")
+SQLUSERNAME = get_secret("Mysql_Username")
+SQLPASSWORD = get_secret("Mysql_Password")
+SQLDBNAME = get_secret("Mysql_DBname")
+
+DB_URL = f'mysql+pymysql://{SQLUSERNAME}:{SQLPASSWORD}@{HOSTNAME}:{PORT}/{SQLDBNAME}'
+
+class db_conn:
+    def __init__(self):
+        self.engine = create_engine(DB_URL, pool_recycle=500)
+
+    def sessionmaker(self):
+        Session = sessionmaker(bind=self.engine)
+        session = Session()
+        return session
+    
+    def connection(self):
+        conn = self.engine.connection()
+        return conn
+
 url = 'http://0.0.0.0:5500/shoppingmall_closed'  # 5000번 포트에서 가져올게요
 response = requests.get(url)
 json_data = response.json()
@@ -35,26 +59,67 @@ client = MongoClient(f'mongodb://{USERNAME}:{PASSWORD}@{HOSTNAME}')
 db = client['api_pj']
 col = db['shoppingmall_closed']
 
+sqldb = db_conn()
+session = sqldb.sessionmaker()
+
+# 포트 연결 확인용
 @app.get(path='/')
 async def connectionCheck():
     return "connected"
 
+# mongodb에서 데이터 가져오기
 @app.get(path='/onlinemalls')
 async def onlinemalls():
     result = {"resultcode": response.status_code}
     data = list(col.find({}, {"_id": 0}))
-    result['result'] = data
+    result['result'] = data['result']
     return len(data)
 
+# year과 subject를 인자로 받아 해당 인자와 동일한 행만 가져오기
 @app.get(path='/calc')
 async def divideSection(year = None, subject=None):
     cursor = col.find({}, { "_id":0})
     df = pd.DataFrame(list(cursor))
     print(df.columns)
     df_cal = df.iloc[:,[1,8]]
-    df_calc = df_cal.loc[((df_cal['폐업일자'].dt.year)==int(year)) & (df_cal['업태구분명'].str.contains(subject))]
+    if year is None:
+        df_calc = df_cal.loc[df_cal['업태구분명'].str.contains(subject)]
+    elif subject is None:
+        df_calc = df_cal.loc[(df_cal['폐업일자'].dt.year)==int(year)]
+    else:
+        df_calc = df_cal.loc[((df_cal['폐업일자'].dt.year)==int(year)) & (df_cal['업태구분명'].str.contains(subject))]
     print(df_calc.head())
-    return len(df_calc)
+    return df_calc
+
+@app.get('/getPyeupAll')
+async def getAll():
+    result = session.query(Pyeup)
+    return result.all()
+
+# sql table에 데이터 삽입
+@app.get('/insertSQL')
+async def insertSQL(year = null):
+    data = await divideSection(year)
+    result = session.query(Pyeup).filter(Pyeup.year == year).all()
+    if (len(result) != 0):
+        return result
+    for i in range(1, len(data)):
+        id = str(uuid.uuid4())
+        # subject = data[i]
+        # count = data[i][str(year)]
+        # percentage = data[i][str(year)]
+        # new_pyeup = Pyeup(id = id,year = year,subject=subject, count=count, percentage=percentage)
+        # session.add(new_pyeup)
+        # session.commit()
+        # session.refresh(new_pyeup)
+    result = session.query(Pyeup).filter(Pyeup.year == year).all()
+    return result
+
+# sql 데이터 가져오기
+@app.get('/getSQL')
+async def selectGet():
+    result = session.query(Pyeup).all()
+    return result
 
 #  공공데이터API에서 데이터를 가져오는 api
 @app.get(path='/getApi')
@@ -83,7 +148,7 @@ async def insertApiMongo():
     return col.find_one({},{"_id":0})
 
 
-
+# mongo에 저장된 공공데이터 api 가져오기
 @app.get(path='/getApiMongo')
 async def getApiMongo():
     col = db['today_failed']
@@ -99,16 +164,8 @@ async def getApiMongo():
         for j in today_failed:
             if i in j:
                 column_dict[i] += 1
-    # for i in range( )
     print(column_dict)
     return today_failed, column_dict
-
-    # df = pd.DataFrame(list(json_string))
-    # print(df.columns)
-    # df_cal = df.iloc[:,[1,8]]
-    # df_calc = df_cal.loc[((df_cal['폐업일자'].dt.year)==int(year)) & (df_cal['업태구분명'].str.contains(subject))]
-    # print(df_calc.head())
-    # return len(df_calc)
 
 #mongo data delete
 @app.get(path='/datasetDelete')
