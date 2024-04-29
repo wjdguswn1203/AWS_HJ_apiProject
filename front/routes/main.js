@@ -9,14 +9,15 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.get('/Hello', (req, res) => {
-    res.send("Hello World")
+app.get('/', (req, res) => {
+    res.redirect('index.html');
 })
 
 app.get('/selectPyeup', async (req, res) => {
-    const [data, fileds] = await pool.query("select * from pyeup")
-    console.log(data);
-    res.send(data);
+    const [data, fileds] = await pool.query("select * from pyeup");
+    // console.log(data);
+
+    res.redirect('selectPyeup.html');
 })
 
 module.exports = app;

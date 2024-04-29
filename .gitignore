@@ -8,3 +8,4 @@ secret.json
 /python/shoppingmall_closed.csv
 /python/__pycache__
 /python/fastapi/__pycache__
+.vscode
