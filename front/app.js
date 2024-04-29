@@ -5,7 +5,7 @@ const app = express()
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
-app.set('port', process.env.PORT || 8000)
+app.set('port', process.env.PORT || 8500)
 app.use(morgan('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: false}))
@@ -17,5 +17,5 @@ app.use('/', main)
 
 
 app.listen(app.get('port'), () => {
-    console.log('8000 Port: Server Started~!!');
+    console.log('8500 Port: Server Started~!!');
 });

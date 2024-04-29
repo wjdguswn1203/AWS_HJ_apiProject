@@ -75,6 +75,7 @@ async def onlinemalls():
     result['result'] = data['result']
     return len(data)
 
+# 연도별 폐업한 업종의 수와 증감률 계산하기
 @app.get(path='/mongoYear')
 async def mongoYear():
     col = db['shppingmall_year_count']
@@ -117,12 +118,6 @@ async def mongoYear():
         data1 = list(col.find({},{"_id":0}))
         return data1
 
-@app.get(path='/getCalcData')
-async def getCalcData():
-    col = db['shppingmall_year_count']
-    data1 = list(col.find({},{"_id":0}))
-    return data1
-
 
 # year를 인자로 받아 해당 인자와 동일한 행만 가져오기
 @app.get(path='/calc')
@@ -152,8 +147,7 @@ async def insertSQL():
             session.refresh(new_pyeup)
             result = session.query(Pyeup).all()
         return result
-
-
+    
 #  공공데이터API에서 데이터를 가져오는 api
 @app.get(path='/getApi')
 async def getApi():

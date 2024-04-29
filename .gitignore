@@ -1,6 +1,7 @@
 # node moudules 파일
-/Front/node_modules
-/Front/package-lock.json
+/front/node_modules
+/front/package-lock.json
+/front/pool.js
 .env
 secret.json
 /python/shoppingmall_closed_data.json
