@@ -6,7 +6,7 @@ import os.path
 import xmltodict
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
-from models import Pyeup
+from models import Pyeup, PyeupApi
 import uuid
 
 app = FastAPI()
@@ -77,40 +77,45 @@ async def onlinemalls():
 
 @app.get(path='/mongoYear')
 async def mongoYear():
-    new_df = pd.DataFrame(columns=['year','subject', 'count', 'percentage'])
-    # 2019~2023 까지 반복
-    for year in range(2019,2024):
-        data = await calc(year) # 이번년도 데이터
-        last_data = await calc(year-1) # 작년도 데이터
-
-        # 각 항목별 카운트 값을 구한다.
-        column_dict = {'교육/도서/완구/오락':0, '가전':0, '컴퓨터/사무용품':0, '가구/수납용품':0, '건강/식품':0, '의류/패션/잡화/뷰티':0, '자동차/자동차용품':0, '레져/여행/공연':0, '기타':0}
-        last_column_dict = {'교육/도서/완구/오락':0, '가전':0, '컴퓨터/사무용품':0, '가구/수납용품':0, '건강/식품':0, '의류/패션/잡화/뷰티':0, '자동차/자동차용품':0, '레져/여행/공연':0, '기타':0}
-
-        # 이번년도 모든 데이터 순회
-        for i in range(0, len(data)):
-            subject_val = data.iloc[i,1]
-            for j in column_dict:
-                if j in subject_val:
-                    column_dict[j] += 1
-        for i in range(0, len(last_data)):
-            last_subject = last_data.iloc[i,1]
-            for i in column_dict:
-                if i in last_subject:
-                    last_column_dict[i] += 1
-        # 증감률을 구한다. (이번년도 데이터 - 작년 데이터) / 작년 데이터 * 100), 소수점은 첫째 자리까지만 구한다.
-        result_dict = {key: round(((column_dict[key] - last_column_dict[key]) / last_column_dict[key]) * 100, 1) for key in column_dict}
-        
-        # 새로운 행 추가
-        for key, value in column_dict.items():
-            new_row = pd.DataFrame({'year': year,'subject': key, 'count': value, 'percentage': result_dict[key]}, index=[0])
-            new_df = pd.concat([new_df, new_row], ignore_index=True)
-
     col = db['shppingmall_year_count']
-    data_dict_list = new_df.to_dict(orient='records')
-    col.insert_many(data_dict_list)
     data1 = list(col.find({},{"_id":0}))
-    return data1
+    if len(data1) != 0:
+        return data1
+    else:
+        new_df = pd.DataFrame(columns=['year','subject', 'count', 'percentage'])
+        # 2019~2023 까지 반복
+        for year in range(2019,2024):
+            data = await calc(year) # 이번년도 데이터
+            last_data = await calc(year-1) # 작년도 데이터
+
+            # 각 항목별 카운트 값을 구한다.
+            column_dict = {'교육/도서/완구/오락':0, '가전':0, '컴퓨터/사무용품':0, '가구/수납용품':0, '건강/식품':0, '의류/패션/잡화/뷰티':0, '자동차/자동차용품':0, '레져/여행/공연':0, '기타':0}
+            last_column_dict = {'교육/도서/완구/오락':0, '가전':0, '컴퓨터/사무용품':0, '가구/수납용품':0, '건강/식품':0, '의류/패션/잡화/뷰티':0, '자동차/자동차용품':0, '레져/여행/공연':0, '기타':0}
+
+            # 이번년도 모든 데이터 순회
+            for i in range(0, len(data)):
+                subject_val = data.iloc[i,1]
+                for j in column_dict:
+                    if j in subject_val:
+                        column_dict[j] += 1
+            for i in range(0, len(last_data)):
+                last_subject = last_data.iloc[i,1]
+                for i in column_dict:
+                    if i in last_subject:
+                        last_column_dict[i] += 1
+            # 증감률을 구한다. (이번년도 데이터 - 작년 데이터) / 작년 데이터 * 100), 소수점은 첫째 자리까지만 구한다.
+            result_dict = {key: round(((column_dict[key] - last_column_dict[key]) / last_column_dict[key]) * 100, 1) for key in column_dict}
+            
+            # 새로운 행 추가
+            for key, value in column_dict.items():
+                new_row = pd.DataFrame({'year': year,'subject': key, 'count': value, 'percentage': result_dict[key]}, index=[0])
+                new_df = pd.concat([new_df, new_row], ignore_index=True)
+
+        new_df = new_df.drop_duplicates()
+        data_dict_list = new_df.to_dict(orient='records')
+        col.insert_many(data_dict_list)
+        data1 = list(col.find({},{"_id":0}))
+        return data1
 
 @app.get(path='/getCalcData')
 async def getCalcData():
@@ -119,49 +124,35 @@ async def getCalcData():
     return data1
 
 
-# year과 subject를 인자로 받아 해당 인자와 동일한 행만 가져오기
+# year를 인자로 받아 해당 인자와 동일한 행만 가져오기
 @app.get(path='/calc')
-async def calc(year = None, subject=None):
+async def calc(year = None):
     cursor = col.find({}, { "_id":0})
     df = pd.DataFrame(list(cursor))
     df_cal = df.iloc[:,[1,8]]
     if year is None:
-        df_calc = df_cal.loc[df_cal['업태구분명'].str.contains(subject)]
-    elif subject is None:
-        df_calc = df_cal.loc[(df_cal['폐업일자'].dt.year)==int(year)]
-    elif year is None and subject is None:
         df_calc = df_cal
     else:
-        df_calc = df_cal.loc[((df_cal['폐업일자'].dt.year)==int(year)) & (df_cal['업태구분명'].str.contains(subject))]
+        df_calc = df_cal.loc[(df_cal['폐업일자'].dt.year)==int(year)]
     return df_calc
-
-@app.get('/getPyeupAll')
-async def getAll():
-    result = session.query(Pyeup)
-    return result.all()
 
 # sql table에 데이터 삽입
 @app.get('/insertSQL')
-async def insertSQL(year = null):
+async def insertSQL():
     # year에 맞는 폐업데이터가 sql에 존재시 sql 데이터를  리턴
-    result = session.query(Pyeup).filter(Pyeup.year == year).all()
+    result = session.query(Pyeup).all()
     if (len(result) != 0):
         return result
     else:
         data = await mongoYear()
-        pyeup_objects = [Pyeup(id=uuid.uuid4(), year=item['year'], subject=item['subject'], count=item['count'], percentage=item['percentage']) for item in data]
-        # new_pyeup = Pyeup(id = id,year = year,subject=subject, count=count, percentage=percentage)
-        # session.add(new_pyeup)
-        # session.commit()
-        # session.refresh(new_pyeup)
-        # result = session.query(Pyeup).filter(Pyeup.year == year).all()
-        # return id
+        for item in data:
+            new_pyeup = Pyeup(id=uuid.uuid4(), year=item['year'], subject=item['subject'], count=item['count'], percentage=item['percentage'])
+            session.add(new_pyeup)
+            session.commit()
+            session.refresh(new_pyeup)
+            result = session.query(Pyeup).all()
+        return result
 
-# sql 데이터 가져오기
-@app.get('/getSQL')
-async def selectGet():
-    result = session.query(Pyeup).all()
-    return result
 
 #  공공데이터API에서 데이터를 가져오는 api
 @app.get(path='/getApi')
@@ -204,9 +195,24 @@ async def getApiMongo():
         for j in today_failed:
             if i in j:
                 column_dict[i] += 1
-    print(column_dict)
-    return data
+    return column_dict
 
+# sql table에 데이터 삽입
+@app.get('/getPyeupApiSql')
+async def insertApiSql():
+    # year에 맞는 폐업데이터가 sql에 존재시 sql 데이터를  리턴
+    result = session.query(PyeupApi).all()
+    if (len(result) != 0):
+        return result
+    else:
+        data = await getApiMongo()
+        for key, item in data.items():
+            new_pyeup_api = PyeupApi(id=uuid.uuid4(), subject=key, count=item)
+            session.add(new_pyeup_api)
+            session.commit()
+            session.refresh(new_pyeup_api)
+            result = session.query(PyeupApi).all()
+        return result
 
 #mongo data delete
 @app.get(path='/datasetDelete')

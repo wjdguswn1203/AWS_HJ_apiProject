@@ -12,3 +12,10 @@ class Pyeup(Base):
     count = Column(INT, unique=False, nullable=False)
     percentage = Column(INT, unique=False, nullable=False)
 
+class PyeupApi(Base):
+    __tablename__ = 'pyeupapi'
+    id = Column(String(120), primary_key=True)
+    subject = Column(String(255), unique=False, nullable=False)
+    count = Column(INT, unique=False, nullable=False)
+
+
