@@ -35,4 +35,24 @@ app.get("/selectPyeup", async (req, res) => {
     }
 });
 
+app.get("/selectPyeupApi", async (req, res) => {
+    try {
+        let tmp = await pool.query("select * from pyeupapi;");
+        console.log(tmp);
+        console.log(tmp[0].length);
+        if (tmp[0].length == 0) {
+            const response = await axios.get("http://0.0.0.0:3500/getPyeupApiSql");
+            tmp = response.data;
+        }
+        tmp = await pool.query("SELECT * FROM pyeupapi WHERE count > 0 ORDER BY count DESC;");
+        var result = {
+            "result code": res.statusCode,
+            result: tmp[0],
+        };
+        res.send(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+    }
+});
 module.exports = app;

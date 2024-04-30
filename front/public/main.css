@@ -72,14 +72,11 @@ a {
     bottom: 0;
     background-color: #0F172A;
     width: max-content;
-    height: 30%;
-    padding: 5px;
+    height: 24%;
     color: white;
 }
 .todaytable {
     color: #3b82f6;
-}
-.todaytable td {
     font-size: 17px;
 }
 .contents {
