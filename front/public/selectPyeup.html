@@ -26,20 +26,21 @@
           <a href="http://192.168.1.67:8000/selectJikguData.html">직구 데이터</a>
         </div>
         <div class="m_div">
-          <a href="./selectPyeup.html">온라인 쇼핑몰 폐업 데이터</a>
+          <a href="/selectPyeup.html"
+            >온라인 쇼핑몰 폐업 데이터</a
+          >
         </div>
         <div class="m_div">
-          <a href="#">직구 영향 업종</a>
+          <a href="http://192.168.1.67:8000/calcData.html">직구 영향 업종</a>
         </div>
         <div class="m_div">
-          <a href="#">연도별 직구, 폐업 데이터 비교</a>
+          <a href="/compareData.html">연도별 직구, 폐업 데이터 비교</a>
         </div>
-        <!-- 메뉴바 밑 오늘 폐업한 온라인 쇼핑몰 시작 -->
         <div class="bottom">
           <table id="todayClosureTable">
             <thead>
               <tr>
-                <th style="font-size: 15px;">오늘 폐업한 온라인 쇼핑몰</th>
+                <th style="font-size: 15px">오늘 폐업한 온라인 쇼핑몰</th>
               </tr>
             </thead>
             <tbody id="todayClosureData"></tbody>
@@ -49,7 +50,8 @@
           fetch("/selectPyeupApi")
             .then((response) => response.json())
             .then((data) => {
-              const todayClosureDataElement = document.getElementById("todayClosureData");
+              const todayClosureDataElement =
+                document.getElementById("todayClosureData");
               if (data.result.length > 0) {
                 // 결과가 있는 경우
                 data.result.forEach((item) => {
@@ -69,12 +71,11 @@
             })
             .catch((error) => console.error("Error fetching data:", error));
         </script>
-        <!-- 메뉴바 밑 오늘 폐업한 온라인 쇼핑몰 끝 -->
       </div>
       <!-- 결과 데이터가 나오는 곳 -->
       <div class="contents">
         <div class="contents_header">
-          <div class="title" style="color: black">온라인 쇼핑몰 폐업 데이터</div>
+          <div class="title_contents">온라인 쇼핑몰 폐업 데이터</div>
           <select id="year" class="contents_select">
             <option value="2019">2019</option>
             <option value="2020">2020</option>
@@ -102,7 +103,7 @@
                         <td>${index + 1}</td>
                         <td>${item.subject}</td>
                         <td>${item.count}</td>
-                        <td>${item.percentage}</td>
+                        <td>${item.percentage}%</td>
                     `;
                       PyeupDataElement.appendChild(row);
                       });
@@ -140,10 +141,12 @@
                 data.result.forEach((item, index) => {
                   const row = document.createElement("tr");
                   row.innerHTML = `
+                        <tr>
                         <td>${index + 1}</td>
                         <td>${item.subject}</td>
                         <td>${item.count}</td>
-                        <td>${item.percentage}</td>
+                        <td>${item.percentage}%</td>
+                        </tr>
                     `;
                     PyeupDataElement.appendChild(row);
                 });

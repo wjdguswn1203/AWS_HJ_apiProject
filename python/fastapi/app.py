@@ -8,6 +8,13 @@ from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
 from models import Pyeup, PyeupApi
 import uuid
+# 그래프 import
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+from dtaidistance import dtw
+from flask import Flask, render_template
+
 
 app = FastAPI()
 
@@ -34,6 +41,9 @@ PORT = get_secret("Mysql_Port")
 SQLUSERNAME = get_secret("Mysql_Username")
 SQLPASSWORD = get_secret("Mysql_Password")
 SQLDBNAME = get_secret("Mysql_DBname")
+
+TEAMHOSTNAME = get_secret("My_Team_Hostname")
+
 
 DB_URL = f'mysql+pymysql://{SQLUSERNAME}:{SQLPASSWORD}@{HOSTNAME}:{PORT}/{SQLDBNAME}'
 
@@ -67,21 +77,13 @@ session = sqldb.sessionmaker()
 async def connectionCheck():
     return "connected"
 
-# mongodb에서 데이터 가져오기
-@app.get(path='/onlinemalls')
-async def onlinemalls():
-    result = {"resultcode": response.status_code}
-    data = list(col.find({}, {"_id": 0}))
-    result['result'] = data['result']
-    return len(data)
-
 # 연도별 폐업한 업종의 수와 증감률 계산하기
 @app.get(path='/mongoYear')
 async def mongoYear():
     col = db['shppingmall_year_count']
     data1 = list(col.find({},{"_id":0}))
     if len(data1) != 0:
-        return data1
+        return {"result code":200, "result":data1}
     else:
         new_df = pd.DataFrame(columns=['year','subject', 'count', 'percentage'])
         # 2019~2023 까지 반복
@@ -116,8 +118,7 @@ async def mongoYear():
         data_dict_list = new_df.to_dict(orient='records')
         col.insert_many(data_dict_list)
         data1 = list(col.find({},{"_id":0}))
-        return data1
-
+        return {"result code":200, "result":data1}
 
 # year를 인자로 받아 해당 인자와 동일한 행만 가져오기
 @app.get(path='/calc')
@@ -137,16 +138,18 @@ async def insertSQL():
     # year에 맞는 폐업데이터가 sql에 존재시 sql 데이터를  리턴
     result = session.query(Pyeup).all()
     if (len(result) != 0):
-        return result
+        return {"result code":200, "result":result}
     else:
         data = await mongoYear()
+        data = list(data['result'])
         for item in data:
             new_pyeup = Pyeup(id=uuid.uuid4(), year=item['year'], subject=item['subject'], count=item['count'], percentage=item['percentage'])
             session.add(new_pyeup)
             session.commit()
             session.refresh(new_pyeup)
             result = session.query(Pyeup).all()
-        return result
+        
+        return {"result code":200, "result":result}
     
 #  공공데이터API에서 데이터를 가져오는 api
 @app.get(path='/getApi')
@@ -189,7 +192,8 @@ async def getApiMongo():
         for j in today_failed:
             if i in j:
                 column_dict[i] += 1
-    return column_dict
+    return {"result code":200, "result":column_dict}
+
 
 # sql table에 데이터 삽입
 @app.get('/getPyeupApiSql')
@@ -197,16 +201,51 @@ async def insertApiSql():
     # year에 맞는 폐업데이터가 sql에 존재시 sql 데이터를  리턴
     result = session.query(PyeupApi).all()
     if (len(result) != 0):
-        return result
+        return {"result code":200, "result":result}
     else:
         data = await getApiMongo()
+        data = data['result']
         for key, item in data.items():
             new_pyeup_api = PyeupApi(id=uuid.uuid4(), subject=key, count=item)
             session.add(new_pyeup_api)
             session.commit()
             session.refresh(new_pyeup_api)
             result = session.query(PyeupApi).all()
-        return result
+        return {"result code":200, "result":result}
+
+@app.get('/getJikguMall')
+async def getJikguMall():
+    response = requests.get('http://'+TEAMHOSTNAME+":3000/usingData")
+    response = response.json()
+    response = response['result']
+
+    pyeup_data = await insertSQL()
+    pyeup_data = pyeup_data['result']
+    
+    print(pyeup_data[0].year)
+    total_count = {2019: 0, 2020:0, 2021:0, 2022:0, 2023:0}
+    for i in range(len(pyeup_data)):
+        total_count[pyeup_data[i].year] += pyeup_data[i].count
+    pyeup_value = list(total_count.values())
+    #print(response[0].values())
+    shopping_value = list(response[0].values())
+    shopping_value.pop()
+
+    year = [2019,2020,2021,2022,2023]
+    year =  np.array(year)
+    shopping_value = np.array(shopping_value)
+    pyeup_value = np.array(pyeup_value)
+    pyeup_value = (pyeup_value/pyeup_value.sum()) * 100
+    shopping_value = (shopping_value/shopping_value.sum()) * 100
+
+    plt.rcParams['font.family'] = 'NanumBarunGothic'
+    plt.bar(year-0.17, pyeup_value, 0.35,  label="폐업")
+    plt.bar((year + 0.18),shopping_value, 0.35 , label="직구")
+    plt.title("연도별 직구수와 폐업수")
+    plt.xlabel('year')
+    plt.legend()
+    plt.savefig('../../front/public/bar_chart.png')
+    return 0
 
 #mongo data delete
 @app.get(path='/datasetDelete')

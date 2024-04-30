@@ -6,7 +6,7 @@ body {
     width: 100%;
     height: 100vh;
     margin: 0;
-    overflow: hidden;
+    
 }
 /* a 태그 사용 시 밑줄과 색 변경 제거 */
 a {
@@ -35,10 +35,16 @@ a {
 }
 .title {
     font-size: 20px;
-    /* 폰트 굵기 100-700 */
     font-weight: 700;
     color: #ffffff;
     margin-bottom: 3px;
+}
+.title_contents {
+    font-size: 25px;
+    font-weight: 700;
+    color: black;
+    margin-bottom: 3px;
+    margin-left: 15px;
 }
 /* 하단 contents */
 .main {
@@ -81,35 +87,46 @@ a {
     font-size: 17px;
 }
 .contents {
-    width: 80%;
-    margin-left: 60px;
-    margin-right: 60px;
-    margin-bottom: 80px;
+    width: 70%;
+    height: 100%;
+    padding-top: 120px;
+    margin: 0 auto;
 }
 .contents_header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
 }
 .contents_select {
-    width: 70px;
-    height: 30px;
+    width: auto;
+    height: auto;
+    margin-right: 15px;
+    padding: 8px 10px;
+    border: 1px solid #dddddd;
+    border-radius: 10px;
+
 }
 .contents_table {
     width: 100%;
     background-color: #ffffff;
+    border: 0px;
     color: #303030;
+    border-collapse: collapse;
 
 }
+.contents_table thead {
+    background-color: #ffffff;
+    color: #2d2d2d;
+}
 .contents_table th {
-    padding: 10px;
-    border-bottom: 1px solid #949494;
+    padding: 20px;
+    border-bottom: 1px solid #dddddd;
 }
 .contents_table td {
     text-align: center;
-    padding: 10px;
+    padding: 20px;
 }
 .contents_table tr:nth-child(even) {
     text-align: center;
