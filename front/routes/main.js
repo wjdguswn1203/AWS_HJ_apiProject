@@ -17,8 +17,6 @@ app.get("/selectPyeup", async (req, res) => {
     const year = req.query.year;
     try {
         let tmp = await pool.query("select * from pyeup where year=?", [year]);
-        console.log(tmp);
-        console.log(tmp[0].length);
         if (tmp[0].length == 0) {
             const response = await axios.get("http://0.0.0.0:3500/insertSQL?year=" + String(year));
             tmp = response.data;
@@ -38,8 +36,6 @@ app.get("/selectPyeup", async (req, res) => {
 app.get("/selectPyeupApi", async (req, res) => {
     try {
         let tmp = await pool.query("select * from pyeupapi;");
-        console.log(tmp);
-        console.log(tmp[0].length);
         if (tmp[0].length == 0) {
             const response = await axios.get("http://0.0.0.0:3500/getPyeupApiSql");
             tmp = response.data;
