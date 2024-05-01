@@ -87,22 +87,22 @@ a {
 }
 .m_div_selected {
 /* 선택된 메뉴 색상 */
-width: 100%;
-height: 5vh;
-padding-top: 30px;
-background-color: #fcb43b;
+    width: 100%;
+    height: 5vh;
+    padding-top: 30px;
+    background-color: #fcb43b;
 }
 .m_div_selected:hover {
-color: #ffffff;
-background-color: #eed5bb;
+    color: #ffffff;
+    background-color: #eed5bb;
 }
 .m_div_selected a {
-color: #222222;
-font-size: 15px;
-font-weight: 700;
-padding: 10px;
-width: 100%;
-height: 100%;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 10px;
+    width: 100%;
+    height: 100%;
 }
 .m_div_selected a:hover {
 color: #ffffff;
