@@ -1,11 +1,12 @@
 body {
-    background-color: #f6f8fc;
-    font-family: "Noto Sans KR", sans-serif;
+    background-color: #FAF8F3;
+    font-family: "Nanum Gothic Coding", monospace;
     font-optical-sizing: auto;
     font-style: normal;
     width: 100%;
     height: 100vh;
     margin: 0;
+    overflow: hidden;
     
 }
 /* a 태그 사용 시 밑줄과 색 변경 제거 */
@@ -15,17 +16,19 @@ a {
 }
 /* 헤더 태그들 */
 .header {
-    background-color: #0F172A;
+    background-color: #fff;
     width: 100vw;
-    height: 10%;
+    height: 8%;
     margin: 0;
     /* border-bottom: 1px solid #e0e0e0; */
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-bottom: 1px solid #ececec;
+    /* box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1); */
 }
 .h_div {
-    margin-left: 15px;
+    margin-left: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -34,10 +37,11 @@ a {
     margin: 10px;
 }
 .title {
-    font-size: 20px;
-    font-weight: 700;
-    color:  #ffffff;
+    font-size: 25px;
+    font-weight: 500;
+    color:  #FF6F0E;
     margin-bottom: 3px;
+    font-family: "Jua", sans-serif;
 }
 .title_contents {
     font-size: 25px;
@@ -54,40 +58,64 @@ a {
 }
 /* 메뉴바 태그들 */
 .menu {
-    background-color: #0f172a;
+    background-color: #F8F5F4;
     width: 220px;
     height: 100%;
     margin: 0;
-    padding-top: 20px;
     /* border-right: 1px solid #e0e0e0; */
 }
 .m_div {
     width: 100%;
     height: 5vh;
-    padding-top: 10px;
+    padding-top: 30px;
+    background-color: #F8F5F4;
 }
-.m_div a:hover {
-    color: #3b82f6;
+.m_div:hover {
+    color: #ffffff;
+    background-color: #EED5BB;
 }
 .m_div a {
-    color: #e0e8f6;
-    font-size: 13px;
-    margin: 10px;
+    color: #222222;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 10px;
+    width: 100%;
+    height: 100%;
+}
+.m_div a:hover {
+    color: #ffffff;
 }
 .bottom {
     position: fixed;
     bottom: 0;
-    background-color: #0F172A;
+    background-color: #fff;
     width: max-content;
-    height: 24%;
-    color: white;
+    height: 20%;
+    color: #000000;
+    border-radius: 20px; 
+    margin-bottom: 25px;
+    margin-left: 5px;
+    padding: 7px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.bottom tbody {
+    margin: 0 auto;
+    
+}
+.bottom tr {
+    padding-bottom: 5px;
+    
 }
 .todaytable {
-    color: #3b82f6;
-    font-size: 17px;
+    color: #95df70;
+    font-size: 13px;
+    font-weight: 700;
 }
 .contents {
-    width: 70%;
+    width: 60%;
     height: 100%;
     padding-top: 120px;
     margin: 0 auto;
@@ -100,12 +128,14 @@ a {
     margin-bottom: 15px;
 }
 .contents_select {
-    width: auto;
+    width: 90px;
     height: auto;
     margin-right: 15px;
     padding: 8px 10px;
-    border: 1px solid #dddddd;
+    border: 1px solid #F7A62D;
+    color: #F7A62D;
     border-radius: 10px;
+    font-size: 15px;
 
 }
 .contents_table {
@@ -114,6 +144,8 @@ a {
     border: 0px;
     color: #303030;
     border-collapse: collapse;
+    border-radius: 20px; 
+    /* box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1); */
 
 }
 .contents_table thead {
@@ -122,15 +154,19 @@ a {
 }
 .contents_table th {
     padding: 20px;
-    border-bottom: 1px solid #dddddd;
+    border-bottom: 1px solid #ececec;
+    border-radius: 20px; 
 }
 .contents_table td {
     text-align: center;
     padding: 20px;
 }
-.contents_table tr:nth-child(even) {
+.contents_table tr {
     text-align: center;
-    background-color: #f7f7f7;
+    border-bottom: 1px solid #ececec;
 }
-
+.contents_table tr:last-child {
+    text-align: center;
+    border-bottom: None;
+}
 

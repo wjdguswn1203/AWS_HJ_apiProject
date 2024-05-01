@@ -72,10 +72,6 @@ col = db['shoppingmall_closed']
 sqldb = db_conn()
 session = sqldb.sessionmaker()
 
-# 포트 연결 확인용
-@app.get(path='/')
-async def connectionCheck():
-    return "connected"
 
 # 연도별 폐업한 업종의 수와 증감률 계산하기
 @app.get(path='/mongoYear')
@@ -238,40 +234,6 @@ async def getJikguMall():
     pyeup_value = (pyeup_value/pyeup_value.sum()) * 100
     shopping_value = (shopping_value/shopping_value.sum()) * 100
 
-    plt.rcParams['font.family'] = 'NanumBarunGothic'
-    plt.bar(year-0.17, pyeup_value, 0.35,  label="폐업")
-    plt.bar((year + 0.18),shopping_value, 0.35 , label="직구")
-    plt.title("연도별 직구수와 폐업수")
-    plt.xlabel('year')
-    plt.legend()
-    plt.savefig('../../front/public/bar_chart.png')
-    return 0
-
-@app.get('/getJikguMall')
-async def getJikguMall():
-    response = requests.get('http://'+TEAMHOSTNAME+":3000/usingData")
-    response = response.json()
-    response = response['result']
-
-    pyeup_data = await insertSQL()
-    pyeup_data = pyeup_data['result']
-    
-    print(pyeup_data[0].year)
-    total_count = {2019: 0, 2020:0, 2021:0, 2022:0, 2023:0}
-    for i in range(len(pyeup_data)):
-        total_count[pyeup_data[i].year] += pyeup_data[i].count
-    pyeup_value = list(total_count.values())
-    #print(response[0].values())
-    shopping_value = list(response[0].values())
-    shopping_value.pop()
-
-    year = [2019,2020,2021,2022,2023]
-    year =  np.array(year)
-    shopping_value = np.array(shopping_value)
-    pyeup_value = np.array(pyeup_value)
-    pyeup_value = (pyeup_value/pyeup_value.sum()) * 100
-    shopping_value = (shopping_value/shopping_value.sum()) * 100
-
     plt.figure()
     plt.rcParams['font.family'] = 'NanumBarunGothic'
     plt.bar(year-0.17, pyeup_value, 0.35,  label="폐업")
@@ -281,8 +243,7 @@ async def getJikguMall():
     plt.legend()
     plt.savefig('../../front/public/bar_chart.png')
     plt.close()
-
-    return 0
+    return {"result code":200, "result":'../../front/public/bar_chart.png'}
 
 #mongo data delete
 @app.get(path='/datasetDelete')

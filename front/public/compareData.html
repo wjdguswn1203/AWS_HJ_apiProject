@@ -87,7 +87,15 @@
             />
           </div>
           <script>
-            fetch("http://192.168.1.61:3500/getJikguMall")
+            function reloadPage() {
+              setInterval(function () {
+                location.reload();
+              }, 3000); // 3초(3000밀리초)마다 실행
+            }
+
+            document.getElementById("displayedImage").onerror = function () {
+              this.src = "loader.gif";
+              fetch("http://192.168.1.61:3500/getJikguMall")
               .then((response) => {
                 if (!response.ok) {
                   throw new Error("Network response was not ok");
@@ -100,17 +108,9 @@
                   error
                 );
               });
-            function reloadPage() {
-              setInterval(function () {
-                location.reload();
-              }, 3000); // 3초(3000밀리초)마다 실행
-            }
-
-            document.getElementById("displayedImage").onerror = function () {
-              this.src = "loader.gif";
               reloadPage();
               setTimeout(function () {
-              img.src = "graph.png";
+              img.src = "bar_chart.png";
             }, 3000); // 3초 후에 graph.png로 변경
             };
 
