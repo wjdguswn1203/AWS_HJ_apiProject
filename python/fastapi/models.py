@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, INT
+from sqlalchemy import Column, String, INT, BLOB
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -18,4 +18,8 @@ class PyeupApi(Base):
     subject = Column(String(255), unique=False, nullable=False)
     count = Column(INT, unique=False, nullable=False)
 
+class GraphImg(Base):
+    __tablename__ = 'graphimg'
+    subject = Column(String(45), primary_key=True)
+    image = Column(BLOB)
 

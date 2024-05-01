@@ -8,7 +8,6 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
-    <script src="main.js"></script>
   </head>
   <body>
     <!-- 레이아웃 헤더  -->
@@ -87,6 +86,36 @@
               alt="Displayed Image"
             />
           </div>
+          <script>
+            fetch("http://192.168.1.61:3500/getJikguMall")
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error("Network response was not ok");
+                }
+                return response.json();
+              })
+              .catch((error) => {
+                console.error(
+                  "There was a problem with your fetch operation:",
+                  error
+                );
+              });
+            function reloadPage() {
+              setInterval(function () {
+                location.reload();
+              }, 3000); // 3초(3000밀리초)마다 실행
+            }
+
+            document.getElementById("displayedImage").onerror = function () {
+              this.src = "loader.gif";
+              reloadPage();
+              setTimeout(function () {
+              img.src = "graph.png";
+            }, 3000); // 3초 후에 graph.png로 변경
+            };
+
+
+          </script>
         </div>
       </div>
     </div>
